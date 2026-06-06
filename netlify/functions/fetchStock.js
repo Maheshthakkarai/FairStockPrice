@@ -1,4 +1,6 @@
-import yahooFinance from 'yahoo-finance2';
+import YahooFinance from 'yahoo-finance2';
+
+const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 
 export const handler = async (event) => {
   if (event.httpMethod !== 'GET') {
@@ -11,7 +13,6 @@ export const handler = async (event) => {
   }
 
   try {
-    yahooFinance.suppressNotices(['yahooSurvey']);
     
     const quote = await yahooFinance.quote(ticker);
     const quoteSummary = await yahooFinance.quoteSummary(ticker, {
