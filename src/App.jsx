@@ -31,7 +31,7 @@ function App() {
   const [editingPortfolioItem, setEditingPortfolioItem] = useState(null);
 
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
-  const [isWatchlistExpanded, setIsWatchlistExpanded] = useState(true);
+  const [isWatchlistExpanded, setIsWatchlistExpanded] = useState(false);
   const [expandedPortfolios, setExpandedPortfolios] = useState({});
   
   useEffect(() => {
@@ -645,7 +645,7 @@ function App() {
           const flagCodes = { USD: 'us', CAD: 'ca', GBP: 'gb', GBp: 'gb', INR: 'in', AUD: 'au', EUR: 'eu', CHF: 'ch', JPY: 'jp', HKD: 'hk', SGD: 'sg', CNY: 'cn' };
           const fCode = flagCodes[stats.currency] || 'un';
           const flagImg = <img src={`https://flagcdn.com/w20/${fCode}.png`} srcSet={`https://flagcdn.com/w40/${fCode}.png 2x`} width="20" alt={stats.currency} style={{ borderRadius: '2px' }} />;
-          const isExpanded = expandedPortfolios[stats.currency] !== false;
+          const isExpanded = expandedPortfolios[stats.currency] === true;
           
           return (
           <div key={stats.currency} className="glass-panel fade-in" style={{ marginBottom: '1.5rem', border: '1px solid var(--accent-color)' }}>
