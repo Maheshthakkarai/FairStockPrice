@@ -9,6 +9,11 @@
   --error-color: #ef4444;
   --success-color: #10b981;
   --warning-color: #f59e0b;
+  --card-bg-solid: #1f2937;
+  --input-bg-solid: #111827;
+  --btn-secondary-bg: rgba(255, 255, 255, 0.1);
+  --btn-secondary-hover: rgba(255, 255, 255, 0.15);
+  --btn-secondary-text: #ffffff;
 }
 
 * {
@@ -169,11 +174,12 @@ input:focus {
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-text);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--btn-secondary-hover);
 }
 
 .icon-btn {
@@ -441,6 +447,11 @@ body.light-mode {
   --panel-border: rgba(0, 0, 0, 0.1);
   --text-primary: #111827;
   --text-secondary: #4b5563;
+  --card-bg-solid: #ffffff;
+  --input-bg-solid: #ffffff;
+  --btn-secondary-bg: rgba(0, 0, 0, 0.05);
+  --btn-secondary-hover: rgba(0, 0, 0, 0.1);
+  --btn-secondary-text: #111827;
 }
 body.light-mode .modal-content {
   background: #ffffff;

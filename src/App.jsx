@@ -470,7 +470,7 @@ function App() {
             <select 
               value={region} 
               onChange={e => setRegion(e.target.value)}
-              style={{ padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--panel-border)', background: '#111827', color: '#fff', fontSize: '0.9rem' }}
+              style={{ padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--panel-border)', background: 'var(--input-bg-solid)', color: 'var(--text-primary)', fontSize: '0.9rem' }}
             >
               <option value="US">🇺🇸 US</option>
               <option value="CA">🇨🇦 CA</option>
@@ -490,6 +490,7 @@ function App() {
                 onFocus={() => setShowSuggestions(true)}
                 placeholder="e.g. AAPL, MSFT"
                 required
+                style={{ padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--panel-border)', background: 'var(--input-bg-solid)', color: 'var(--text-primary)', fontSize: '0.9rem' }}
               />
               {showSuggestions && suggestions.length > 0 && (
                 <ul className="autocomplete-dropdown">
@@ -606,13 +607,13 @@ function App() {
             {/* V3: News and Competitors */}
             <div className="v3-features-container" style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {data.competitors && data.competitors.length > 0 && (
-                <div className="competitors-card" style={{ padding: '1rem', backgroundColor: '#1f2937', borderRadius: '12px', border: '1px solid var(--panel-border)' }}>
+                <div className="competitors-card" style={{ padding: '1rem', backgroundColor: 'var(--card-bg-solid)', borderRadius: '12px', border: '1px solid var(--panel-border)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--text-secondary)' }}>
                     <Users size={16} /> <span>Peer Comparison</span>
                   </div>
                   <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                     {data.competitors.map(comp => (
-                      <button key={comp} onClick={() => handleFetch(comp)} style={{ background: '#374151', border: 'none', color: '#fff', padding: '0.5rem 1rem', borderRadius: '20px', cursor: 'pointer', fontSize: '0.85rem' }}>
+                      <button key={comp} onClick={() => handleFetch(comp)} style={{ background: 'var(--bg-color)', border: '1px solid var(--panel-border)', color: 'var(--text-primary)', padding: '0.5rem 1rem', borderRadius: '20px', cursor: 'pointer', fontSize: '0.85rem' }}>
                         {comp}
                       </button>
                     ))}
@@ -620,21 +621,6 @@ function App() {
                 </div>
               )}
 
-              {data.news && data.news.length > 0 && (
-                <div className="news-card" style={{ padding: '1rem', backgroundColor: '#1f2937', borderRadius: '12px', border: '1px solid var(--panel-border)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--text-secondary)' }}>
-                    <Newspaper size={16} /> <span>Latest News</span>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                    {data.news.map((item, idx) => (
-                      <a key={idx} href={item.link} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-color)', textDecoration: 'none', display: 'block', paddingBottom: idx !== data.news.length - 1 ? '0.75rem' : '0', borderBottom: idx !== data.news.length - 1 ? '1px solid var(--panel-border)' : 'none' }}>
-                        <div style={{ fontSize: '0.9rem', marginBottom: '0.25rem', lineHeight: '1.4' }}>{item.title}</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--accent-color)' }}>{item.publisher}</div>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
 
             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }} data-html2canvas-ignore="true">
@@ -677,7 +663,7 @@ function App() {
             </div>
 
             {stats.insights.length > 0 && (
-              <div style={{ backgroundColor: '#1f2937', padding: '1rem', borderRadius: '12px', border: '1px solid #374151' }}>
+              <div style={{ backgroundColor: 'var(--card-bg-solid)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--panel-border)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: '#eab308' }}>
                   <Zap size={16} /> <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>Agentic Robo-Advisor</span>
                 </div>
@@ -766,7 +752,7 @@ function App() {
                   min="0"
                   value={editingPortfolioItem.shares || ''}
                   onChange={e => setEditingPortfolioItem({...editingPortfolioItem, shares: e.target.value})}
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--panel-border)', background: '#111827', color: '#fff' }}
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--panel-border)', background: 'var(--input-bg-solid)', color: 'var(--text-primary)' }}
                   placeholder="e.g. 10.5"
                 />
               </div>
@@ -778,7 +764,7 @@ function App() {
                   min="0"
                   value={editingPortfolioItem.avgCost || ''}
                   onChange={e => setEditingPortfolioItem({...editingPortfolioItem, avgCost: e.target.value})}
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--panel-border)', background: '#111827', color: '#fff' }}
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--panel-border)', background: 'var(--input-bg-solid)', color: 'var(--text-primary)' }}
                   placeholder="e.g. 150.25"
                 />
               </div>
