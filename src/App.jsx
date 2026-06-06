@@ -702,10 +702,18 @@ function App() {
           </div>
           {isWatchlistExpanded && (
             <>
-              {watchlist.map((item) => (
+              {watchlist.map((item) => {
+                const flagCodes = { USD: 'us', CAD: 'ca', GBP: 'gb', GBp: 'gb', INR: 'in', AUD: 'au', EUR: 'eu', CHF: 'ch', JPY: 'jp', HKD: 'hk', SGD: 'sg', CNY: 'cn' };
+                const fCode = flagCodes[item.currency] || 'un';
+                const flagImg = <img src={`https://flagcdn.com/w20/${fCode}.png`} srcSet={`https://flagcdn.com/w40/${fCode}.png 2x`} width="20" alt={item.currency || 'flag'} style={{ borderRadius: '2px', marginRight: '8px', verticalAlign: 'text-bottom' }} />;
+                
+                return (
                 <div key={item.ticker} className="watchlist-item">
                   <div className="watchlist-item-details">
-                    <span className="watchlist-ticker">{item.ticker} - {getCurrencySymbol(item.currency, item.currencySymbol)}{item.price}</span>
+                    <span className="watchlist-ticker" style={{ display: 'flex', alignItems: 'center' }}>
+                      {flagImg}
+                      {item.ticker} - {getCurrencySymbol(item.currency, item.currencySymbol)}{item.price}
+                    </span>
                     <span className="watchlist-status">{item.status} (Fair: {item.fairPrice})</span>
                     {parseFloat(item.shares) > 0 && (
                       <span style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
@@ -725,7 +733,8 @@ function App() {
                     </button>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </>
           )}
         </div>
