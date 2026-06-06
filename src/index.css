@@ -431,3 +431,48 @@ input:focus {
   background-color: var(--bg-color); /* for screenshot */
   border-radius: 16px;
 }
+
+/* --- V5 Vanguard Updates --- */
+
+/* Light Mode: Clean White/Gray Corporate Dashboard */
+body.light-mode {
+  --bg-color: #f3f4f6;
+  --panel-bg: rgba(255, 255, 255, 0.95);
+  --panel-border: rgba(0, 0, 0, 0.1);
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+}
+body.light-mode .modal-content {
+  background: #ffffff;
+}
+body.light-mode .autocomplete-dropdown {
+  background: #ffffff;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+body.light-mode input {
+  background: #ffffff;
+  color: #111827;
+}
+
+/* Micro-animations & Transitions */
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+.glass-panel, .watchlist-item, .btn, .icon-btn, .modal-content {
+  transition: all 0.3s ease;
+}
+.watchlist-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+body.light-mode .watchlist-item:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.autocomplete-dropdown {
+  animation: slideDown 0.2s ease-out forwards;
+}

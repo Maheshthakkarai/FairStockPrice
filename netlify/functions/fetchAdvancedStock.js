@@ -41,6 +41,7 @@ export const handler = async (event) => {
     const currentPrice = quote.regularMarketPrice;
     const peRatio = summary.summaryDetail?.trailingPE || summary.summaryDetail?.forwardPE || 0;
     const dividendYield = (summary.summaryDetail?.dividendYield || 0) * 100;
+    const dividendRate = summary.summaryDetail?.dividendRate || 0;
     
     const currency = quote.currency || 'USD';
     let currencySymbol = quote.currencySymbol;
@@ -71,6 +72,9 @@ export const handler = async (event) => {
     const targetPrice = summary.financialData?.targetMeanPrice || null;
     const eps = summary.defaultKeyStatistics?.trailingEps || summary.defaultKeyStatistics?.forwardEps || 0;
     const bvps = summary.defaultKeyStatistics?.bookValue || 0;
+    const debtToEquity = summary.financialData?.debtToEquity || 0;
+    const currentRatio = summary.financialData?.currentRatio || 0;
+    const returnOnEquity = (summary.financialData?.returnOnEquity || 0) * 100;
 
     // 4. Fetch News & Competitors (Fail gracefully if not available)
     let news = [];
@@ -99,10 +103,14 @@ export const handler = async (event) => {
         peRatio,
         epsGrowth,
         dividendYield,
+        dividendRate,
         sector,
         targetPrice,
         eps,
         bvps,
+        debtToEquity,
+        currentRatio,
+        returnOnEquity,
         chartData,
         news,
         competitors,

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Info, PieChart, BookmarkPlus, Trash2, TrendingUp, Download, X, AlertTriangle, Loader2, RefreshCw, Share2, Activity, Target, Shield, Newspaper, Users, Edit2, Briefcase, Zap } from 'lucide-react';
+import { Search, Info, PieChart, BookmarkPlus, Trash2, TrendingUp, Download, X, AlertTriangle, Loader2, RefreshCw, Share2, Activity, Target, Shield, Newspaper, Users, Edit2, Briefcase, Zap, Sun, Moon, Bell } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import * as htmlToImage from 'html-to-image';
 import './index.css';
@@ -28,9 +28,20 @@ function App() {
   
   const [watchlist, setWatchlist] = useState([]);
   const [refreshingTickers, setRefreshingTickers] = useState({});
+  const [editingPortfolioItem, setEditingPortfolioItem] = useState(null);
+
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
+  
+  useEffect(() => {
+    if (theme === 'light') {
+      document.body.classList.add('light-mode');
+    } else {
+      document.body.classList.remove('light-mode');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
 
   const [showModal, setShowModal] = useState(false);
-  const [editingPortfolioItem, setEditingPortfolioItem] = useState(null);
   
   const captureRef = useRef(null);
 
@@ -222,8 +233,13 @@ function App() {
       sector: data.sector || 'Unknown',
       currency: data.currency || 'USD',
       currencySymbol: getCurrencySymbol(data.currency, data.currencySymbol),
+      dividendRate: data.dividendRate || 0,
+      debtToEquity: data.debtToEquity || 0,
+      currentRatio: data.currentRatio || 0,
+      returnOnEquity: data.returnOnEquity || 0,
       shares: existingIndex >= 0 ? watchlist[existingIndex].shares || 0 : 0,
-      avgCost: existingIndex >= 0 ? watchlist[existingIndex].avgCost || 0 : 0
+      avgCost: existingIndex >= 0 ? watchlist[existingIndex].avgCost || 0 : 0,
+      targetPrice: existingIndex >= 0 ? watchlist[existingIndex].targetPrice || null : null
     };
 
     let newList = [...watchlist];
@@ -253,14 +269,28 @@ function App() {
 
       const updatedList = watchlist.map(item => {
         if (item.ticker === tickerToRefresh) {
+          const currentPrice = result.currentPrice ? parseFloat(result.currentPrice.toFixed(2)) : parseFloat(item.price);
+          
+          // Local Notification Alert Logic
+          if (item.targetPrice && currentPrice <= item.targetPrice && Notification.permission === 'granted') {
+            new Notification(`Price Alert: ${item.ticker}`, {
+              body: `${item.ticker} has dropped to ${getCurrencySymbol(result.currency || item.currency, result.currencySymbol || item.currencySymbol)}${currentPrice.toFixed(2)} (Target: ${item.targetPrice})`,
+              icon: '/icon-192.png'
+            });
+          }
+
           return {
             ...item,
-            price: result.currentPrice ? result.currentPrice.toFixed(2) : item.price,
+            price: currentPrice.toFixed(2),
             fairPrice: val.blendedFairPrice !== '0.00' ? val.blendedFairPrice : item.fairPrice,
             status: val.status !== 'Unavailable' ? val.status : item.status,
             sector: result.sector || item.sector || 'Unknown',
             currency: result.currency || item.currency || 'USD',
-            currencySymbol: getCurrencySymbol(result.currency || item.currency, result.currencySymbol || item.currencySymbol)
+            currencySymbol: getCurrencySymbol(result.currency || item.currency, result.currencySymbol || item.currencySymbol),
+            dividendRate: result.dividendRate || item.dividendRate || 0,
+            debtToEquity: result.debtToEquity || item.debtToEquity || 0,
+            currentRatio: result.currentRatio || item.currentRatio || 0,
+            returnOnEquity: result.returnOnEquity || item.returnOnEquity || 0
           };
         }
         return item;
@@ -298,6 +328,7 @@ function App() {
             symbol: sym,
             totalValue: 0,
             totalCost: 0,
+            totalDividend: 0,
             insights: [],
             sectorWeights: {},
             hasPortfolio: true
@@ -309,8 +340,9 @@ function App() {
         const cost = shares * (parseFloat(item.avgCost) || 0);
         p.totalValue += val;
         p.totalCost += cost;
-        const s = item.sector || 'Unknown';
-        p.sectorWeights[s] = (p.sectorWeights[s] || 0) + val;
+        p.totalDividend += shares * (parseFloat(item.dividendRate) || 0);
+        
+        p.sectorWeights[item.sector] = (p.sectorWeights[item.sector] || 0) + val;
       }
     });
 
@@ -325,9 +357,27 @@ function App() {
           }
         });
       }
+      
+      if (p.totalDividend > 0) {
+        p.insights.push(`💸 Projected Annual Dividend Income: ${p.symbol}${p.totalDividend.toFixed(2)}`);
+      }
 
       watchlist.filter(i => (i.currency || 'USD') === p.currency).forEach(item => {
         const shares = parseFloat(item.shares) || 0;
+        
+        // Financial Health Scoring & Insights
+        if (shares > 0) {
+          if (item.debtToEquity > 200) {
+             p.insights.push(`📉 Debt Warning: ${item.ticker} has dangerously high Debt-to-Equity (${item.debtToEquity.toFixed(0)}%).`);
+          }
+          if (item.currentRatio > 0 && item.currentRatio < 1) {
+             p.insights.push(`⚠️ Liquidity Risk: ${item.ticker} has a Current Ratio < 1, indicating short-term cash strain.`);
+          }
+          if (item.returnOnEquity > 20) {
+             p.insights.push(`🏆 Quality Alert: ${item.ticker} boasts an exceptional Return on Equity of ${item.returnOnEquity.toFixed(1)}%!`);
+          }
+        }
+
         // Strip non-numeric chars from fairPrice
         const fp = parseFloat((item.fairPrice || '0').replace(/[^0-9.-]+/g, ''));
         if (shares > 0 && parseFloat(item.price) < fp * 0.8) {
@@ -368,6 +418,19 @@ function App() {
     }
   };
 
+  const handleRequestNotifications = async () => {
+    if ('Notification' in window) {
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        alert('Local Price Alerts enabled! Leave this tab open in the background to receive notifications.');
+      } else {
+        alert('Notification permission denied. Please enable them in your browser settings.');
+      }
+    } else {
+      alert('Your browser does not support notifications.');
+    }
+  };
+
   return (
     <div className="container">
 
@@ -378,6 +441,13 @@ function App() {
         </div>
         
         <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button className="btn btn-secondary icon-btn" onClick={() => { triggerHaptic(); setTheme(theme === 'dark' ? 'light' : 'dark'); }} title="Toggle Light/Dark Mode">
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+          
+          <button className="btn btn-secondary icon-btn" onClick={() => { triggerHaptic(); handleRequestNotifications(); }} title="Enable Local Price Alerts">
+            <Bell size={18} />
+          </button>
 
           <button className="btn btn-secondary icon-btn" onClick={() => { triggerHaptic(); setShowModal(true); }}>
             <Info size={18} /> <span className="hide-on-mobile">How to Use</span>
@@ -490,6 +560,22 @@ function App() {
                 </ResponsiveContainer>
                 <div style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
                   1-Year Price History vs. <span style={{color: 'var(--success-color)'}}>Fair Value Line</span>
+                </div>
+              </div>
+            )}
+
+            {data.news && data.news.length > 0 && (
+              <div className="glass-panel" style={{ padding: '1rem', marginTop: '1.5rem', marginBottom: '1.5rem', border: '1px solid var(--panel-border)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--text-primary)' }}>
+                  <Newspaper size={18} color="var(--accent-color)" /> <span style={{ fontWeight: 'bold', fontSize: '1rem' }}>Latest News</span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {data.news.map((item, i) => (
+                    <a key={i} href={item.link} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'block', padding: '0.5rem 0', borderBottom: i < data.news.length - 1 ? '1px solid var(--panel-border)' : 'none' }}>
+                      <div style={{ fontWeight: '500', marginBottom: '0.25rem', color: 'var(--text-primary)' }}>{item.title}</div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{item.publisher}</div>
+                    </a>
+                  ))}
                 </div>
               </div>
             )}
@@ -696,7 +782,20 @@ function App() {
                   placeholder="e.g. 150.25"
                 />
               </div>
-              <button type="submit" className="btn btn-secondary" style={{ width: '100%', backgroundColor: 'var(--accent-color)' }}>Save Holdings</button>
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Target Price for Alerts ({getCurrencySymbol(editingPortfolioItem.currency, editingPortfolioItem.currencySymbol)})</label>
+                <input 
+                  type="number" 
+                  step="any" 
+                  min="0"
+                  value={editingPortfolioItem.targetPrice || ''}
+                  onChange={e => setEditingPortfolioItem({...editingPortfolioItem, targetPrice: e.target.value})}
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--panel-border)', background: 'transparent', color: 'var(--text-primary)' }}
+                  placeholder="e.g. 100.00"
+                />
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>Set a target price below the current price to receive local push notifications.</div>
+              </div>
+              <button type="submit" className="btn btn-secondary" style={{ width: '100%', backgroundColor: 'var(--accent-color)' }}>Save Holdings & Alerts</button>
             </form>
           </div>
         </div>
