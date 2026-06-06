@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Info, PieChart, BookmarkPlus, Trash2, TrendingUp, Download, X, AlertTriangle, Loader2, RefreshCw, Share2, Activity, Target, Shield, Newspaper, Users, Edit2, Briefcase, Zap, Sun, Moon, Bell } from 'lucide-react';
+import { Search, Info, PieChart, BookmarkPlus, Trash2, TrendingUp, Download, X, AlertTriangle, Loader2, RefreshCw, Share2, Activity, Target, Shield, Newspaper, Users, Edit2, Briefcase, Zap, Sun, Moon, Bell, ChevronDown, ChevronUp } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import * as htmlToImage from 'html-to-image';
 import './index.css';
@@ -31,6 +31,8 @@ function App() {
   const [editingPortfolioItem, setEditingPortfolioItem] = useState(null);
 
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
+  const [isWatchlistExpanded, setIsWatchlistExpanded] = useState(true);
+  const [expandedPortfolios, setExpandedPortfolios] = useState({});
   
   useEffect(() => {
     if (theme === 'light') {
@@ -643,34 +645,46 @@ function App() {
           const flagCodes = { USD: 'us', CAD: 'ca', GBP: 'gb', GBp: 'gb', INR: 'in', AUD: 'au', EUR: 'eu', CHF: 'ch', JPY: 'jp', HKD: 'hk', SGD: 'sg', CNY: 'cn' };
           const fCode = flagCodes[stats.currency] || 'un';
           const flagImg = <img src={`https://flagcdn.com/w20/${fCode}.png`} srcSet={`https://flagcdn.com/w40/${fCode}.png 2x`} width="20" alt={stats.currency} style={{ borderRadius: '2px' }} />;
+          const isExpanded = expandedPortfolios[stats.currency] !== false;
           
           return (
           <div key={stats.currency} className="glass-panel fade-in" style={{ marginBottom: '1.5rem', border: '1px solid var(--accent-color)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', color: 'var(--accent-color)' }}>
-              <Briefcase size={20} /> <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.125rem', margin: 0 }}>{flagImg} My Portfolio ({stats.currency})</h3>
+            <div 
+              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isExpanded ? '1rem' : '0', color: 'var(--accent-color)', cursor: 'pointer' }}
+              onClick={() => setExpandedPortfolios(prev => ({...prev, [stats.currency]: !isExpanded}))}
+            >
+              <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.125rem', margin: 0 }}>
+                <Briefcase size={20} /> {flagImg} My Portfolio ({stats.currency})
+              </h3>
+              {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1.5rem' }}>
-              <div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Total Value</div>
-                <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{stats.symbol}{stats.totalValue.toFixed(2)}</div>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>All-Time Return</div>
-                <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: stats.returnVal >= 0 ? 'var(--success-color)' : '#ef4444' }}>
-                  {stats.returnVal >= 0 ? '+' : ''}{stats.symbol}{stats.returnVal.toFixed(2)} ({stats.returnPct >= 0 ? '+' : ''}{stats.returnPct.toFixed(2)}%)
+            
+            {isExpanded && (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1.5rem' }}>
+                  <div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Total Value</div>
+                    <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{stats.symbol}{stats.totalValue.toFixed(2)}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>All-Time Return</div>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: stats.returnVal >= 0 ? 'var(--success-color)' : '#ef4444' }}>
+                      {stats.returnVal >= 0 ? '+' : ''}{stats.symbol}{stats.returnVal.toFixed(2)} ({stats.returnPct >= 0 ? '+' : ''}{stats.returnPct.toFixed(2)}%)
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
 
-            {stats.insights.length > 0 && (
-              <div style={{ backgroundColor: 'var(--card-bg-solid)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--panel-border)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: '#eab308' }}>
-                  <Zap size={16} /> <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>Agentic Robo-Advisor</span>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.85rem', lineHeight: '1.4' }}>
-                  {stats.insights.map((ins, i) => <div key={i}>{ins}</div>)}
-                </div>
-              </div>
+                {stats.insights.length > 0 && (
+                  <div style={{ backgroundColor: 'var(--card-bg-solid)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--panel-border)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: '#eab308' }}>
+                      <Zap size={16} /> <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>Agentic Robo-Advisor</span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.85rem', lineHeight: '1.4' }}>
+                      {stats.insights.map((ins, i) => <div key={i}>{ins}</div>)}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
           );
@@ -679,31 +693,41 @@ function App() {
 
       {watchlist.length > 0 && (
         <div className="glass-panel watchlist-container fade-in">
-          <h3 style={{ fontSize: '1.125rem', marginBottom: '1rem' }}>Watchlist</h3>
-          {watchlist.map((item) => (
-            <div key={item.ticker} className="watchlist-item">
-              <div className="watchlist-item-details">
-                <span className="watchlist-ticker">{item.ticker} - {getCurrencySymbol(item.currency, item.currencySymbol)}{item.price}</span>
-                <span className="watchlist-status">{item.status} (Fair: {item.fairPrice})</span>
-                {parseFloat(item.shares) > 0 && (
-                  <span style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
-                    {item.shares} shares @ {getCurrencySymbol(item.currency, item.currencySymbol)}{item.avgCost} | Value: {getCurrencySymbol(item.currency, item.currencySymbol)}{(parseFloat(item.shares) * parseFloat(item.price)).toFixed(2)}
-                  </span>
-                )}
-              </div>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button className="delete-btn" onClick={() => setEditingPortfolioItem(item)}>
-                  <Edit2 size={18} />
-                </button>
-                <button className="delete-btn" onClick={() => handleRefreshWatchlistItem(item.ticker)} disabled={refreshingTickers[item.ticker]}>
-                  {refreshingTickers[item.ticker] ? <Loader2 size={18} className="loading-spinner" /> : <RefreshCw size={18} />}
-                </button>
-                <button className="delete-btn" onClick={() => removeFromWatchlist(item.ticker)}>
-                  <Trash2 size={18} />
-                </button>
-              </div>
-            </div>
-          ))}
+          <div 
+             style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isWatchlistExpanded ? '1rem' : '0', cursor: 'pointer' }}
+             onClick={() => setIsWatchlistExpanded(!isWatchlistExpanded)}
+          >
+            <h3 style={{ fontSize: '1.125rem', margin: 0 }}>Watchlist</h3>
+            {isWatchlistExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+          </div>
+          {isWatchlistExpanded && (
+            <>
+              {watchlist.map((item) => (
+                <div key={item.ticker} className="watchlist-item">
+                  <div className="watchlist-item-details">
+                    <span className="watchlist-ticker">{item.ticker} - {getCurrencySymbol(item.currency, item.currencySymbol)}{item.price}</span>
+                    <span className="watchlist-status">{item.status} (Fair: {item.fairPrice})</span>
+                    {parseFloat(item.shares) > 0 && (
+                      <span style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
+                        {item.shares} shares @ {getCurrencySymbol(item.currency, item.currencySymbol)}{item.avgCost} | Value: {getCurrencySymbol(item.currency, item.currencySymbol)}{(parseFloat(item.shares) * parseFloat(item.price)).toFixed(2)}
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button className="delete-btn" onClick={() => setEditingPortfolioItem(item)}>
+                      <Edit2 size={18} />
+                    </button>
+                    <button className="delete-btn" onClick={() => handleRefreshWatchlistItem(item.ticker)} disabled={refreshingTickers[item.ticker]}>
+                      {refreshingTickers[item.ticker] ? <Loader2 size={18} className="loading-spinner" /> : <RefreshCw size={18} />}
+                    </button>
+                    <button className="delete-btn" onClick={() => removeFromWatchlist(item.ticker)}>
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
         </div>
       )}
 
@@ -723,14 +747,15 @@ function App() {
               <button onClick={() => setShowModal(false)} className="delete-btn" style={{ background: 'transparent', padding:0 }}><X size={24} color="var(--text-primary)" /></button>
             </div>
             <div className="modal-body" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: '1.6' }}>
-              <p><strong>1. Search:</strong> Enter a valid US stock ticker (e.g., AAPL) using the auto-complete search box.</p>
+              <p><strong>1. Search:</strong> Enter a valid stock ticker using the auto-complete search box. For non-US stocks, use standard Yahoo Finance suffixes (e.g., RELIANCE.NS, 0005.HK).</p>
               <p><strong>2. Blended Valuation:</strong> Unlike basic tools, StockCalc Pro fetches historical data and combines three legendary models to find the Ultimate Fair Price:
                 <br/>• <em>Graham Number</em> (Defensive asset-based valuation)
                 <br/>• <em>Lynch Fair Price</em> (PEG & Dividend yield growth model)
                 <br/>• <em>Analyst Target</em> (Consensus 1-yr Wall Street target)
               </p>
-              <p><strong>3. Charting:</strong> The 1-year history chart overlays the calculated Fair Value line so you can instantly see if the stock is currently trading at a discount.</p>
-              <p><strong>4. Smart Watchlist:</strong> Save stocks to your list. The app checks prices in the background and will send a notification if a stock drops below fair value!</p>
+              <p><strong>3. Portfolio & Watchlist:</strong> Click the chevron icons to collapse or expand sections. Click the Edit (pencil) icon on any watchlist item to set the number of shares you own, your average cost, and a target price.</p>
+              <p><strong>4. Smart Alerts:</strong> Enable local push notifications via the bell icon. The app checks prices in the background and will send a notification if a stock drops below your target price!</p>
+              <p><strong>5. Agentic Robo-Advisor:</strong> The AI silently analyzes balance sheets and flags concentration risks, high debt, liquidity issues, and stellar returns directly in your portfolio insights!</p>
             </div>
           </div>
         </div>
