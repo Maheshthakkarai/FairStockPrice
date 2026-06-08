@@ -68,16 +68,13 @@ export const handler = async (event) => {
         return null;
       };
 
-      returns.fiveDay = getReturn(5);
-      returns.oneMonth = getReturn(30);
-      returns.threeMonth = getReturn(90);
-      returns.oneYear = getReturn(365);
+      returns.fiveDay = getReturn(new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000));
+      returns.oneMonth = getReturn(new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000));
+      returns.threeMonth = getReturn(new Date(today.getFullYear(), today.getMonth() - 3, today.getDate()));
+      returns.oneYear = getReturn(new Date(today.getFullYear() - 1, today.getMonth(), today.getDate()));
       
-      const ytdData = history.filter(h => h.date >= ytdStart);
-      if (ytdData.length > 0) {
-        const ytdPrice = ytdData[0].close;
-        returns.ytd = ((currentPrice - ytdPrice) / ytdPrice) * 100;
-      }
+      const ytdTarget = new Date(today.getFullYear() - 1, 11, 31);
+      returns.ytd = getReturn(ytdTarget);
     }
 
     // Extract basic data
