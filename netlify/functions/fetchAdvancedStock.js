@@ -50,8 +50,7 @@ export const handler = async (event) => {
     // Calculate Returns
     let returns = { fiveDay: null, oneMonth: null, threeMonth: null, oneYear: null, ytd: null };
     if (history.length > 0) {
-      const getPriceDaysAgo = (days) => {
-        const targetDate = new Date(today.getTime() - days * 24 * 60 * 60 * 1000);
+      const getPriceByDate = (targetDate) => {
         for (let i = history.length - 1; i >= 0; i--) {
           if (history[i].date <= targetDate) {
             return history[i].close;
@@ -60,8 +59,8 @@ export const handler = async (event) => {
         return history[0]?.close;
       };
 
-      const getReturn = (daysAgo) => {
-        const pastPrice = getPriceDaysAgo(daysAgo);
+      const getReturn = (targetDate) => {
+        const pastPrice = getPriceByDate(targetDate);
         if (pastPrice) {
           return ((currentPrice - pastPrice) / pastPrice) * 100;
         }
