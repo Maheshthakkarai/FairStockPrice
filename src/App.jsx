@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Search, Info, PieChart, BookmarkPlus, Trash2, TrendingUp, Download, X, AlertTriangle, Loader2, RefreshCw, Share2, Activity, Target, Shield, Newspaper, Users, Edit2, Briefcase, Zap, Sun, Moon, Bell, ChevronDown, ChevronUp } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { LineChart, Line, BarChart, Bar, Legend, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import * as htmlToImage from 'html-to-image';
 import './index.css';
 
@@ -25,6 +25,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [valuation, setValuation] = useState(null);
+  const [showDetailedAnalysis, setShowDetailedAnalysis] = useState(false);
   
   const [watchlist, setWatchlist] = useState([]);
   const [refreshingTickers, setRefreshingTickers] = useState({});
@@ -200,6 +201,7 @@ function App() {
     setError(null);
     setValuation(null);
     setData(null);
+    setShowDetailedAnalysis(false);
 
     try {
       const response = await fetch(`/.netlify/functions/fetchAdvancedStock?ticker=${tickerToFetch}`);
@@ -624,6 +626,100 @@ function App() {
               )}
 
             </div>
+
+            <div style={{ marginTop: '1.5rem', textAlign: 'center' }} data-html2canvas-ignore="true">
+              <button 
+                className="btn btn-secondary" 
+                style={{ width: '100%' }}
+                onClick={() => { triggerHaptic(); setShowDetailedAnalysis(!showDetailedAnalysis); }}
+              >
+                {showDetailedAnalysis ? 'Hide Detailed Analysis' : 'View Detailed Analysis'}
+              </button>
+            </div>
+
+            {showDetailedAnalysis && data && (
+              <div className="fade-in" style={{ marginTop: '1.5rem', borderTop: '1px solid var(--panel-border)', paddingTop: '1rem' }}>
+                
+                {data.keyStats && (
+                  <div className="detailed-section">
+                    <div className="detailed-section-title">Key Stats</div>
+                    <div className="stat-row"><span className="stat-label">Volume</span><span className="stat-value">{data.keyStats.volume?.toLocaleString() || 'N/A'}</span></div>
+                    <div className="stat-row"><span className="stat-label">Avg Vol (10d)</span><span className="stat-value">{data.keyStats.avgVolume?.toLocaleString() || 'N/A'}</span></div>
+                    <div className="stat-row"><span className="stat-label">52 Wk High</span><span className="stat-value">{data.keyStats.fiftyTwoWeekHigh?.toFixed(2) || 'N/A'}</span></div>
+                    <div className="stat-row"><span className="stat-label">52 Wk Low</span><span className="stat-value">{data.keyStats.fiftyTwoWeekLow?.toFixed(2) || 'N/A'}</span></div>
+                    <div className="stat-row"><span className="stat-label">Market Cap</span><span className="stat-value">{data.keyStats.marketCap ? (data.keyStats.marketCap / 1e9).toFixed(2) + 'B' : 'N/A'}</span></div>
+                    <div className="stat-row"><span className="stat-label">Shares Out.</span><span className="stat-value">{data.keyStats.sharesOutstanding ? (data.keyStats.sharesOutstanding / 1e9).toFixed(2) + 'B' : 'N/A'}</span></div>
+                    <div className="stat-row"><span className="stat-label">Dividend Yield</span><span className="stat-value">{data.dividendYield?.toFixed(2)}%</span></div>
+                    <div className="stat-row"><span className="stat-label">Beta</span><span className="stat-value">{data.keyStats.beta?.toFixed(2) || 'N/A'}</span></div>
+                  </div>
+                )}
+
+                {data.ratios && (
+                  <div className="detailed-section">
+                    <div className="detailed-section-title">Ratios / Profitability</div>
+                    <div className="stat-row"><span className="stat-label">EPS (TTM)</span><span className="stat-value">{data.eps?.toFixed(2) || 'N/A'}</span></div>
+                    <div className="stat-row"><span className="stat-label">P/E Ratio</span><span className="stat-value">{data.peRatio?.toFixed(2) || 'N/A'}</span></div>
+                    <div className="stat-row"><span className="stat-label">EBITDA</span><span className="stat-value">{data.ratios.ebitda ? (data.ratios.ebitda / 1e9).toFixed(2) + 'B' : 'N/A'}</span></div>
+                    <div className="stat-row"><span className="stat-label">Revenue</span><span className="stat-value">{data.ratios.revenue ? (data.ratios.revenue / 1e9).toFixed(2) + 'B' : 'N/A'}</span></div>
+                    <div className="stat-row"><span className="stat-label">Gross Margin</span><span className="stat-value">{data.ratios.grossMargins?.toFixed(2)}%</span></div>
+                    <div className="stat-row"><span className="stat-label">Net Margin</span><span className="stat-value">{data.ratios.netMargins?.toFixed(2)}%</span></div>
+                    <div className="stat-row"><span className="stat-label">Return on Equity</span><span className="stat-value">{data.returnOnEquity?.toFixed(2)}%</span></div>
+                  </div>
+                )}
+
+                {data.events && (
+                  <div className="detailed-section">
+                    <div className="detailed-section-title">Events</div>
+                    <div className="stat-row"><span className="stat-label">Next Earnings</span><span className="stat-value">{data.events.nextEarningsDate ? new Date(data.events.nextEarningsDate).toLocaleDateString() : 'N/A'}</span></div>
+                    <div className="stat-row"><span className="stat-label">Ex-Div Date</span><span className="stat-value">{data.events.exDivDate ? new Date(data.events.exDivDate).toLocaleDateString() : 'N/A'}</span></div>
+                    <div className="stat-row"><span className="stat-label">Div Amount</span><span className="stat-value">{data.dividendRate?.toFixed(2) || 'N/A'}</span></div>
+                  </div>
+                )}
+
+                {data.returns && (
+                  <div className="detailed-section">
+                    <div className="detailed-section-title">Returns</div>
+                    <div className="stat-row"><span className="stat-label">5 Day</span><span className="stat-value" style={{color: data.returns.fiveDay >= 0 ? 'var(--success-color)' : 'var(--error-color)'}}>{data.returns.fiveDay?.toFixed(2)}%</span></div>
+                    <div className="stat-row"><span className="stat-label">1 Month</span><span className="stat-value" style={{color: data.returns.oneMonth >= 0 ? 'var(--success-color)' : 'var(--error-color)'}}>{data.returns.oneMonth?.toFixed(2)}%</span></div>
+                    <div className="stat-row"><span className="stat-label">3 Month</span><span className="stat-value" style={{color: data.returns.threeMonth >= 0 ? 'var(--success-color)' : 'var(--error-color)'}}>{data.returns.threeMonth?.toFixed(2)}%</span></div>
+                    <div className="stat-row"><span className="stat-label">YTD</span><span className="stat-value" style={{color: data.returns.ytd >= 0 ? 'var(--success-color)' : 'var(--error-color)'}}>{data.returns.ytd?.toFixed(2)}%</span></div>
+                    <div className="stat-row"><span className="stat-label">1 Year</span><span className="stat-value" style={{color: data.returns.oneYear >= 0 ? 'var(--success-color)' : 'var(--error-color)'}}>{data.returns.oneYear?.toFixed(2)}%</span></div>
+                  </div>
+                )}
+
+                {data.earningsChart && data.earningsChart.length > 0 && (
+                  <div className="detailed-section">
+                    <div className="detailed-section-title">Earnings</div>
+                    <div style={{ height: 200, marginTop: '1rem' }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={data.earningsChart}>
+                          <XAxis dataKey="date" stroke="var(--text-secondary)" fontSize={10} />
+                          <Tooltip contentStyle={{ backgroundColor: 'var(--bg-color)', borderColor: 'var(--panel-border)' }} />
+                          <Legend wrapperStyle={{ fontSize: '10px' }} />
+                          <Bar dataKey="actual" fill="var(--accent-color)" name="Actual" radius={[4, 4, 0, 0]} />
+                          <Bar dataKey="estimate" fill="rgba(255,255,255,0.3)" name="Estimate" radius={[4, 4, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                )}
+
+                {data.profile && (
+                  <div className="detailed-section">
+                    <div className="detailed-section-title">Profile</div>
+                    <div className="profile-text">{data.profile.description}</div>
+                    <div className="profile-meta"><strong>Industry:</strong> {data.profile.industry}</div>
+                    <div className="profile-meta"><strong>Address:</strong> {data.profile.address}</div>
+                    {data.profile.website && <div className="profile-meta"><strong>Website:</strong> <a href={data.profile.website} target="_blank" rel="noopener noreferrer" style={{color:'var(--accent-color)'}}>{data.profile.website}</a></div>}
+                    <div style={{marginTop: '0.75rem'}}>
+                      <strong>Executives:</strong>
+                      {data.profile.officers.map((o, i) => <div key={i} className="profile-meta" style={{color: 'var(--text-secondary)'}}>- {o.name} ({o.title})</div>)}
+                    </div>
+                  </div>
+                )}
+
+              </div>
+            )}
 
             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }} data-html2canvas-ignore="true">
               <button className="btn btn-secondary" onClick={handleSaveToWatchlist} style={{ flex: 1 }}>

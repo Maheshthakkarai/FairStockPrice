@@ -18,24 +18,57 @@ export const handler = async (event) => {
     
     // 2. Fetch rich summary data
     const summary = await yahooFinance.quoteSummary(ticker, {
-      modules: ['summaryDetail', 'defaultKeyStatistics', 'earningsTrend', 'financialData', 'summaryProfile']
+      modules: ['summaryDetail', 'defaultKeyStatistics', 'earningsTrend', 'financialData', 'summaryProfile', 'calendarEvents', 'earnings', 'price']
     });
 
-    // 3. Fetch 1-Year Historical Data for the chart
-    // We get monthly data to keep the payload small but show the trend
+    // 3. Fetch 1-Year Historical Data for the chart and returns
     const today = new Date();
     const lastYear = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
+    const ytdStart = new Date(today.getFullYear(), 0, 1);
     const history = await yahooFinance.historical(ticker, { 
       period1: lastYear.toISOString().split('T')[0], 
       period2: today.toISOString().split('T')[0],
-      interval: '1mo' 
+      interval: '1d' 
     });
 
-    // Format history for Recharts
-    const chartData = history.map(h => ({
-      date: h.date.toISOString().split('T')[0].slice(0, 7), // YYYY-MM
-      price: parseFloat(h.close.toFixed(2))
-    }));
+    // Format history for Recharts (keep it monthly to not overload UI)
+    const monthlyHistory = [];
+    let currentMonth = '';
+    history.forEach(h => {
+      const monthStr = h.date.toISOString().split('T')[0].slice(0, 7);
+      if (monthStr !== currentMonth) {
+        monthlyHistory.push({ date: monthStr, price: parseFloat(h.close.toFixed(2)) });
+        currentMonth = monthStr;
+      } else {
+        monthlyHistory[monthlyHistory.length - 1].price = parseFloat(h.close.toFixed(2));
+      }
+    });
+    const chartData = monthlyHistory;
+
+    // Calculate Returns
+    let returns = { fiveDay: null, oneMonth: null, threeMonth: null, oneYear: null, ytd: null };
+    if (history.length > 0) {
+      const currentClose = history[history.length - 1].close;
+      
+      const getReturn = (daysAgo) => {
+        if (history.length > daysAgo) {
+          const pastPrice = history[history.length - 1 - daysAgo].close;
+          return ((currentClose - pastPrice) / pastPrice) * 100;
+        }
+        return null;
+      };
+
+      returns.fiveDay = getReturn(5);
+      returns.oneMonth = getReturn(21); // Approx 21 trading days
+      returns.threeMonth = getReturn(63); // Approx 63 trading days
+      returns.oneYear = getReturn(history.length - 1);
+      
+      const ytdData = history.filter(h => h.date >= ytdStart);
+      if (ytdData.length > 0) {
+        const ytdPrice = ytdData[0].close;
+        returns.ytd = ((currentClose - ytdPrice) / ytdPrice) * 100;
+      }
+    }
 
     // Extract basic data
     const currentPrice = quote.regularMarketPrice;
@@ -67,7 +100,7 @@ export const handler = async (event) => {
       if (q1 && q1.growth) epsGrowth = q1.growth * 100;
     }
 
-    // Advanced Data
+    // Advanced Data & New Data Points
     const sector = summary.summaryProfile?.sector || 'Unknown';
     const targetPrice = summary.financialData?.targetMeanPrice || null;
     const eps = summary.defaultKeyStatistics?.trailingEps || summary.defaultKeyStatistics?.forwardEps || 0;
@@ -75,6 +108,40 @@ export const handler = async (event) => {
     const debtToEquity = summary.financialData?.debtToEquity || 0;
     const currentRatio = summary.financialData?.currentRatio || 0;
     const returnOnEquity = (summary.financialData?.returnOnEquity || 0) * 100;
+
+    // Key Stats
+    const volume = summary.summaryDetail?.volume || 0;
+    const avgVolume = summary.summaryDetail?.averageVolume || 0;
+    const fiftyTwoWeekHigh = summary.summaryDetail?.fiftyTwoWeekHigh || 0;
+    const fiftyTwoWeekLow = summary.summaryDetail?.fiftyTwoWeekLow || 0;
+    const marketCap = summary.summaryDetail?.marketCap || summary.price?.marketCap || 0;
+    const sharesOutstanding = summary.defaultKeyStatistics?.sharesOutstanding || 0;
+    const beta = summary.summaryDetail?.beta || summary.defaultKeyStatistics?.beta || 0;
+
+    // Ratios
+    const ebitda = summary.financialData?.ebitda || 0;
+    const revenue = summary.financialData?.totalRevenue || 0;
+    const grossMargins = (summary.financialData?.grossMargins || 0) * 100;
+    const netMargins = (summary.financialData?.profitMargins || 0) * 100;
+
+    // Events
+    const nextEarningsDate = summary.calendarEvents?.earnings?.earningsDate?.[0] || null;
+    const exDivDate = summary.calendarEvents?.exDividendDate || null;
+
+    // Earnings Data
+    const earningsChart = summary.earnings?.earningsChart?.quarterly || [];
+
+    // Profile Data
+    const profile = {
+      description: summary.summaryProfile?.longBusinessSummary || '',
+      industry: summary.summaryProfile?.industry || '',
+      website: summary.summaryProfile?.website || '',
+      officers: (summary.summaryProfile?.companyOfficers || []).slice(0, 3).map(o => ({
+        name: o.name,
+        title: o.title
+      })),
+      address: `${summary.summaryProfile?.address1 || ''}, ${summary.summaryProfile?.city || ''} ${summary.summaryProfile?.state || ''} ${summary.summaryProfile?.zip || ''}`.replace(/^, | , | $/g, '').trim()
+    };
 
     // 4. Fetch News & Competitors (Fail gracefully if not available)
     let news = [];
@@ -115,7 +182,13 @@ export const handler = async (event) => {
         news,
         competitors,
         currency,
-        currencySymbol
+        currencySymbol,
+        keyStats: { volume, avgVolume, fiftyTwoWeekHigh, fiftyTwoWeekLow, marketCap, sharesOutstanding, beta },
+        ratios: { ebitda, revenue, grossMargins, netMargins },
+        events: { nextEarningsDate, exDivDate },
+        returns,
+        earningsChart,
+        profile
       })
     };
 
