@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Search, Info, PieChart, BookmarkPlus, Trash2, TrendingUp, Download, X, AlertTriangle, Loader2, RefreshCw, Share2, Activity, Target, Shield, Newspaper, Users, Edit2, Briefcase, Zap, Sun, Moon, Bell, ChevronDown, ChevronUp } from 'lucide-react';
-import { LineChart, Line, BarChart, Bar, Legend, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { LineChart, Line, BarChart, Bar, Legend, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, LabelList } from 'recharts';
 import * as htmlToImage from 'html-to-image';
 import './index.css';
 
@@ -629,8 +629,8 @@ function App() {
 
             <div style={{ marginTop: '1.5rem', textAlign: 'center' }} data-html2canvas-ignore="true">
               <button 
-                className="btn btn-secondary" 
-                style={{ width: '100%' }}
+                className="btn" 
+                style={{ width: '100%', background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)', color: 'white', border: 'none', padding: '0.85rem', borderRadius: '12px', fontWeight: 'bold', fontSize: '1rem', boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)' }}
                 onClick={() => { triggerHaptic(); setShowDetailedAnalysis(!showDetailedAnalysis); }}
               >
                 {showDetailedAnalysis ? 'Hide Detailed Analysis' : 'View Detailed Analysis'}
@@ -645,6 +645,8 @@ function App() {
                     <div className="detailed-section-title">Key Stats</div>
                     <div className="stat-row"><span className="stat-label">Volume</span><span className="stat-value">{data.keyStats.volume?.toLocaleString() || 'N/A'}</span></div>
                     <div className="stat-row"><span className="stat-label">Avg Vol (10d)</span><span className="stat-value">{data.keyStats.avgVolume?.toLocaleString() || 'N/A'}</span></div>
+                    <div className="stat-row"><span className="stat-label">Day High</span><span className="stat-value">{data.keyStats.dayHigh?.toFixed(2) || 'N/A'}</span></div>
+                    <div className="stat-row"><span className="stat-label">Day Low</span><span className="stat-value">{data.keyStats.dayLow?.toFixed(2) || 'N/A'}</span></div>
                     <div className="stat-row"><span className="stat-label">52 Wk High</span><span className="stat-value">{data.keyStats.fiftyTwoWeekHigh?.toFixed(2) || 'N/A'}</span></div>
                     <div className="stat-row"><span className="stat-label">52 Wk Low</span><span className="stat-value">{data.keyStats.fiftyTwoWeekLow?.toFixed(2) || 'N/A'}</span></div>
                     <div className="stat-row"><span className="stat-label">Market Cap</span><span className="stat-value">{data.keyStats.marketCap ? (data.keyStats.marketCap / 1e9).toFixed(2) + 'B' : 'N/A'}</span></div>
@@ -696,8 +698,12 @@ function App() {
                           <XAxis dataKey="date" stroke="var(--text-secondary)" fontSize={10} />
                           <Tooltip contentStyle={{ backgroundColor: 'var(--bg-color)', borderColor: 'var(--panel-border)' }} />
                           <Legend wrapperStyle={{ fontSize: '10px' }} />
-                          <Bar dataKey="actual" fill="var(--accent-color)" name="Actual" radius={[4, 4, 0, 0]} />
-                          <Bar dataKey="estimate" fill="rgba(255,255,255,0.3)" name="Estimate" radius={[4, 4, 0, 0]} />
+                          <Bar dataKey="actual" fill="#3b82f6" name="Actual" radius={[4, 4, 0, 0]}>
+                            <LabelList dataKey="actual" position="top" style={{ fill: 'var(--text-primary)', fontSize: 10 }} />
+                          </Bar>
+                          <Bar dataKey="estimate" fill="rgba(255,255,255,0.3)" name="Estimate" radius={[4, 4, 0, 0]}>
+                            <LabelList dataKey="estimate" position="top" style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
+                          </Bar>
                         </BarChart>
                       </ResponsiveContainer>
                     </div>
@@ -712,8 +718,12 @@ function App() {
                     <div className="profile-meta"><strong>Address:</strong> {data.profile.address}</div>
                     {data.profile.website && <div className="profile-meta"><strong>Website:</strong> <a href={data.profile.website} target="_blank" rel="noopener noreferrer" style={{color:'var(--accent-color)'}}>{data.profile.website}</a></div>}
                     <div style={{marginTop: '0.75rem'}}>
-                      <strong>Executives:</strong>
-                      {data.profile.officers.map((o, i) => <div key={i} className="profile-meta" style={{color: 'var(--text-secondary)'}}>- {o.name} ({o.title})</div>)}
+                      <strong>Executives: </strong>
+                      {data.profile.officers && data.profile.officers.length > 0 ? (
+                        data.profile.officers.map((o, i) => <div key={i} className="profile-meta" style={{color: 'var(--text-secondary)'}}>- {o.name} ({o.title})</div>)
+                      ) : (
+                        <span style={{color: 'var(--text-secondary)'}}>N/A</span>
+                      )}
                     </div>
                   </div>
                 )}

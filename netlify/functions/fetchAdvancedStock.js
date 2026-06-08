@@ -45,36 +45,45 @@ export const handler = async (event) => {
     });
     const chartData = monthlyHistory;
 
+    const currentPrice = quote.regularMarketPrice;
+
     // Calculate Returns
     let returns = { fiveDay: null, oneMonth: null, threeMonth: null, oneYear: null, ytd: null };
     if (history.length > 0) {
-      const currentClose = history[history.length - 1].close;
-      
+      const getPriceDaysAgo = (days) => {
+        const targetDate = new Date(today.getTime() - days * 24 * 60 * 60 * 1000);
+        for (let i = history.length - 1; i >= 0; i--) {
+          if (history[i].date <= targetDate) {
+            return history[i].close;
+          }
+        }
+        return history[0]?.close;
+      };
+
       const getReturn = (daysAgo) => {
-        if (history.length > daysAgo) {
-          const pastPrice = history[history.length - 1 - daysAgo].close;
-          return ((currentClose - pastPrice) / pastPrice) * 100;
+        const pastPrice = getPriceDaysAgo(daysAgo);
+        if (pastPrice) {
+          return ((currentPrice - pastPrice) / pastPrice) * 100;
         }
         return null;
       };
 
       returns.fiveDay = getReturn(5);
-      returns.oneMonth = getReturn(21); // Approx 21 trading days
-      returns.threeMonth = getReturn(63); // Approx 63 trading days
-      returns.oneYear = getReturn(history.length - 1);
+      returns.oneMonth = getReturn(30);
+      returns.threeMonth = getReturn(90);
+      returns.oneYear = getReturn(365);
       
       const ytdData = history.filter(h => h.date >= ytdStart);
       if (ytdData.length > 0) {
         const ytdPrice = ytdData[0].close;
-        returns.ytd = ((currentClose - ytdPrice) / ytdPrice) * 100;
+        returns.ytd = ((currentPrice - ytdPrice) / ytdPrice) * 100;
       }
     }
 
     // Extract basic data
-    const currentPrice = quote.regularMarketPrice;
     const peRatio = summary.summaryDetail?.trailingPE || summary.summaryDetail?.forwardPE || 0;
     const dividendYield = (summary.summaryDetail?.dividendYield || 0) * 100;
-    const dividendRate = summary.summaryDetail?.dividendRate || 0;
+    const dividendRate = summary.summaryDetail?.trailingAnnualDividendRate || summary.summaryDetail?.dividendRate || 0;
     
     const currency = quote.currency || 'USD';
     let currencySymbol = quote.currencySymbol;
@@ -112,6 +121,8 @@ export const handler = async (event) => {
     // Key Stats
     const volume = summary.summaryDetail?.volume || 0;
     const avgVolume = summary.summaryDetail?.averageVolume || 0;
+    const dayHigh = summary.price?.regularMarketDayHigh || 0;
+    const dayLow = summary.price?.regularMarketDayLow || 0;
     const fiftyTwoWeekHigh = summary.summaryDetail?.fiftyTwoWeekHigh || 0;
     const fiftyTwoWeekLow = summary.summaryDetail?.fiftyTwoWeekLow || 0;
     const marketCap = summary.summaryDetail?.marketCap || summary.price?.marketCap || 0;
@@ -183,7 +194,7 @@ export const handler = async (event) => {
         competitors,
         currency,
         currencySymbol,
-        keyStats: { volume, avgVolume, fiftyTwoWeekHigh, fiftyTwoWeekLow, marketCap, sharesOutstanding, beta },
+        keyStats: { volume, avgVolume, dayHigh, dayLow, fiftyTwoWeekHigh, fiftyTwoWeekLow, marketCap, sharesOutstanding, beta },
         ratios: { ebitda, revenue, grossMargins, netMargins },
         events: { nextEarningsDate, exDivDate },
         returns,
