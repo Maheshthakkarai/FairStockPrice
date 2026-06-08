@@ -731,7 +731,28 @@ function App() {
               </div>
             )}
 
-            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }} data-html2canvas-ignore="true">
+            {/* External Data Verification */}
+            <div className="glass-panel" style={{ marginTop: '1.5rem', padding: '1rem', backgroundColor: 'var(--card-bg-solid)', border: '1px solid var(--panel-border)', borderRadius: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem', color: 'var(--text-primary)' }}>
+                <Shield size={16} color="var(--accent-color)" /> <span style={{ fontWeight: 'bold' }}>External Data Verification</span>
+              </div>
+              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+                Cross-check our raw data and computed algorithms directly against major institutional platforms to ensure accuracy:
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <a href={`https://www.cnbc.com/quotes/${ticker}`} target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{ flex: 1, textAlign: 'center', fontSize: '0.85rem', padding: '0.5rem' }}>
+                  CNBC
+                </a>
+                <a href={`https://www.tradingview.com/symbols/${ticker}`} target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{ flex: 1, textAlign: 'center', fontSize: '0.85rem', padding: '0.5rem' }}>
+                  TradingView
+                </a>
+                <a href={`https://www.google.com/finance/quote/${ticker}:NASDAQ`} target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{ flex: 1, textAlign: 'center', fontSize: '0.85rem', padding: '0.5rem' }}>
+                  Google Finance
+                </a>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.5rem' }} data-html2canvas-ignore="true">
               <button className="btn btn-secondary" onClick={handleSaveToWatchlist} style={{ flex: 1 }}>
                 <BookmarkPlus size={20} /> Save
               </button>
