@@ -717,10 +717,26 @@ function App() {
                     <div className="profile-meta"><strong>Industry:</strong> {data.profile.industry}</div>
                     <div className="profile-meta"><strong>Address:</strong> {data.profile.address}</div>
                     {data.profile.website && <div className="profile-meta"><strong>Website:</strong> <a href={data.profile.website} target="_blank" rel="noopener noreferrer" style={{color:'var(--accent-color)'}}>{data.profile.website}</a></div>}
-                    <div style={{marginTop: '0.75rem'}}>
-                      <strong>Executives: </strong>
+                    <div style={{marginTop: '1rem'}}>
+                      <strong style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>Key Executives</strong>
                       {data.profile.officers && data.profile.officers.length > 0 ? (
-                        data.profile.officers.map((o, i) => <div key={i} className="profile-meta" style={{color: 'var(--text-secondary)'}}>- {o.name} ({o.title})</div>)
+                        <div style={{ backgroundColor: 'var(--bg-color)', borderRadius: '8px', border: '1px solid var(--panel-border)', overflow: 'hidden' }}>
+                          {data.profile.officers.map((o, i) => (
+                            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem', borderBottom: i < data.profile.officers.length - 1 ? '1px solid var(--panel-border)' : 'none' }}>
+                              <div>
+                                <div style={{ color: 'var(--text-primary)', fontWeight: 'bold', fontSize: '0.9rem' }}>
+                                  {o.name} {o.age ? <span style={{fontWeight:'normal', color:'var(--text-secondary)'}}>({o.age})</span> : ''}
+                                </div>
+                                <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', marginTop: '0.1rem' }}>{o.title}</div>
+                              </div>
+                              {o.pay > 0 && (
+                                <div style={{ color: 'var(--text-primary)', fontSize: '0.85rem', fontWeight: '500' }}>
+                                  {(o.pay).toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
                       ) : (
                         <span style={{color: 'var(--text-secondary)'}}>N/A</span>
                       )}

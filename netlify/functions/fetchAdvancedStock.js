@@ -18,7 +18,7 @@ export const handler = async (event) => {
     
     // 2. Fetch rich summary data
     const summary = await yahooFinance.quoteSummary(ticker, {
-      modules: ['summaryDetail', 'defaultKeyStatistics', 'earningsTrend', 'financialData', 'summaryProfile', 'calendarEvents', 'earnings', 'price']
+      modules: ['summaryDetail', 'defaultKeyStatistics', 'earningsTrend', 'financialData', 'summaryProfile', 'assetProfile', 'calendarEvents', 'earnings', 'price']
     });
 
     // 3. Fetch 1-Year Historical Data for the chart and returns
@@ -139,15 +139,18 @@ export const handler = async (event) => {
     const earningsChart = summary.earnings?.earningsChart?.quarterly || [];
 
     // Profile Data
+    const rawOfficers = summary.assetProfile?.companyOfficers || summary.summaryProfile?.companyOfficers || [];
     const profile = {
-      description: summary.summaryProfile?.longBusinessSummary || '',
-      industry: summary.summaryProfile?.industry || '',
-      website: summary.summaryProfile?.website || '',
-      officers: (summary.summaryProfile?.companyOfficers || []).slice(0, 3).map(o => ({
+      description: summary.assetProfile?.longBusinessSummary || summary.summaryProfile?.longBusinessSummary || '',
+      industry: summary.assetProfile?.industry || summary.summaryProfile?.industry || '',
+      website: summary.assetProfile?.website || summary.summaryProfile?.website || '',
+      officers: rawOfficers.slice(0, 4).map(o => ({
         name: o.name,
-        title: o.title
+        title: o.title,
+        age: o.age || null,
+        pay: o.totalPay || 0
       })),
-      address: `${summary.summaryProfile?.address1 || ''}, ${summary.summaryProfile?.city || ''} ${summary.summaryProfile?.state || ''} ${summary.summaryProfile?.zip || ''}`.replace(/^, | , | $/g, '').trim()
+      address: `${summary.assetProfile?.address1 || summary.summaryProfile?.address1 || ''}, ${summary.assetProfile?.city || summary.summaryProfile?.city || ''} ${summary.assetProfile?.state || summary.summaryProfile?.state || ''} ${summary.assetProfile?.zip || summary.summaryProfile?.zip || ''}`.replace(/^, | , | $/g, '').trim()
     };
 
     // 4. Fetch News & Competitors (Fail gracefully if not available)
