@@ -100,13 +100,13 @@ export const handler = async (event) => {
     // EPS Growth calculation
     let epsGrowth = 0;
     const trends = summary.earningsTrend?.trend || [];
-    const fiveYearTrend = trends.find(t => t.period === '+5y');
-    if (fiveYearTrend && fiveYearTrend.growth) {
-      epsGrowth = fiveYearTrend.growth * 100;
-    } else {
-      const q1 = trends.find(t => t.period === '+1q');
-      if (q1 && q1.growth) epsGrowth = q1.growth * 100;
-    }
+    const getGrowth = (periodStr) => {
+      const t = trends.find(t => t.period === periodStr);
+      return t && t.growth ? t.growth * 100 : null;
+    };
+    
+    // Institutional fallback cascade to prevent quarterly volatility from skewing valuation
+    epsGrowth = getGrowth('+5y') ?? getGrowth('+1y') ?? getGrowth('0y') ?? getGrowth('+1q') ?? 0;
 
     // Advanced Data & New Data Points
     const sector = summary.summaryProfile?.sector || 'Unknown';

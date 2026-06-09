@@ -136,13 +136,14 @@ function App() {
     const target = parseFloat(res.targetPrice || '0');
     const sym = getCurrencySymbol(res.currency, res.currencySymbol);
 
-    // 1. Lynch Model
+    // 1. Peter Lynch Fair Value (using PEG)
+    // Fair P/E = Growth Rate + Dividend Yield
     let lynchFairPrice = 0;
     let lynchRatio = 0;
-    if (pe > 0 && price > 0 && (growth + yieldPct) > 0) {
+    if (pe > 0 && price > 0 && (growth + yieldPct) > 0 && eps > 0) {
       lynchRatio = (growth + yieldPct) / pe;
-      const currentEps = price / pe;
-      lynchFairPrice = (growth + yieldPct) * currentEps;
+      // Institutional fix: Use fundamental EPS directly instead of reverse engineering (price / pe)
+      lynchFairPrice = (growth + yieldPct) * eps;
     }
 
     // 2. Graham Number
