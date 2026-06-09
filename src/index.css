@@ -13,6 +13,7 @@
   --success-color: #00e676;
   --warning-color: #ffb74d;
   --card-bg-solid: #11141c;
+  --card-bg-transparent: rgba(0, 0, 0, 0.3);
   --input-bg-solid: #0d1017;
   --btn-secondary-bg: rgba(255, 255, 255, 0.05);
   --btn-secondary-hover: rgba(255, 255, 255, 0.1);
@@ -152,7 +153,7 @@ label {
 
 input {
   width: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--card-bg-transparent);
   border: 1px solid var(--panel-border);
   border-radius: 12px;
   padding: 0.85rem 1rem;
@@ -300,7 +301,7 @@ input:focus {
 .sector-badge {
   display: inline-block;
   font-size: 0.75rem;
-  background: rgba(255,255,255,0.08);
+  background: var(--card-bg-transparent);
   padding: 0.3rem 0.75rem;
   border-radius: 12px;
   margin-top: 0.5rem;
@@ -311,11 +312,11 @@ input:focus {
 
 .chart-container {
   margin: 1.5rem 0;
-  background: rgba(0,0,0,0.3);
+  background: var(--card-bg-transparent);
   border-radius: 16px;
   padding: 1.5rem 0.5rem 0.5rem;
   border: 1px solid var(--panel-border);
-  box-shadow: inset 0 4px 20px rgba(0,0,0,0.5);
+  box-shadow: inset 0 4px 20px rgba(0,0,0,0.1);
 }
 
 /* Bento Grid Layout */
@@ -327,7 +328,7 @@ input:focus {
 }
 
 .bento-item {
-  background: rgba(0, 0, 0, 0.25);
+  background: var(--card-bg-transparent);
   border-radius: 16px;
   padding: 1rem;
   border: 1px solid var(--panel-border);
@@ -433,7 +434,7 @@ input:focus {
   align-items: center;
   justify-content: space-between;
   padding: 1rem;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--card-bg-transparent);
   border-radius: 12px;
   margin-bottom: 0.75rem;
   border: 1px solid var(--panel-border);
@@ -550,7 +551,7 @@ input:focus {
 }
 
 .detailed-section {
-  background: rgba(0,0,0,0.2);
+  background: var(--card-bg-transparent);
   border: 1px solid var(--panel-border);
   border-radius: 16px;
   padding: 1.5rem;
@@ -607,12 +608,13 @@ input:focus {
 /* Light Mode Overrides (if needed) */
 body.light-mode {
   --bg-color: #f8fafc;
-  --panel-bg: rgba(255, 255, 255, 0.7);
+  --panel-bg: rgba(255, 255, 255, 0.85);
   --panel-border: rgba(0, 0, 0, 0.08);
-  --panel-highlight: rgba(255, 255, 255, 0.5);
+  --panel-highlight: rgba(255, 255, 255, 0.9);
   --text-primary: #0f1115;
   --text-secondary: #475569;
   --card-bg-solid: #ffffff;
+  --card-bg-transparent: rgba(255, 255, 255, 0.6);
   --input-bg-solid: #f1f5f9;
   --btn-secondary-bg: rgba(0, 0, 0, 0.05);
   --btn-secondary-hover: rgba(0, 0, 0, 0.1);
@@ -624,4 +626,4 @@ body.light-mode .aura-container { display: none; }
 body.light-mode .bento-featured { background: rgba(37, 99, 235, 0.05); border-left-color: var(--accent-color); }
 body.light-mode .glass-panel { box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
 body.light-mode input { background: #ffffff; color: #0f1115; }
-body.light-mode .btn { color: #ffffff; }
+body.light-mode .btn:not(.btn-secondary) { color: #ffffff; }
