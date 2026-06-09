@@ -548,13 +548,21 @@ function App() {
             </div>
 
             <div className={`status-badge ${valuation.statusClass}`}>
+              <div className="status-dot"></div>
               {valuation.status} (Fair: {valuation.blendedFairPrice})
             </div>
 
             {data.chartData && data.chartData.length > 0 && (
               <div className="chart-container">
-                <ResponsiveContainer width="100%" height={200}>
-                  <LineChart data={data.chartData}>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', textAlign: 'center', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '500' }}>1-Year Price History</div>
+                <ResponsiveContainer width="100%" height={250}>
+                  <LineChart data={data.chartData} margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                    <defs>
+                      <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feDropShadow dx="0" dy="0" stdDeviation="3" floodColor="var(--accent-color)" floodOpacity="0.8" />
+                        <feDropShadow dx="0" dy="0" stdDeviation="8" floodColor="var(--accent-color)" floodOpacity="0.4" />
+                      </filter>
+                    </defs>
                     <XAxis dataKey="date" stroke="var(--text-secondary)" fontSize={10} tickFormatter={(val) => val.split('-')[1]} />
                     <YAxis 
                       domain={[
@@ -565,16 +573,16 @@ function App() {
                       fontSize={10} 
                       width={40} 
                     />
-                    <Tooltip contentStyle={{ backgroundColor: 'var(--bg-color)', borderColor: 'var(--panel-border)' }} />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: 'rgba(10, 14, 23, 0.9)', border: '1px solid var(--panel-border)', borderRadius: '12px', color: 'var(--text-primary)', backdropFilter: 'blur(8px)' }}
+                      itemStyle={{ color: 'var(--accent-color)', fontWeight: 'bold' }}
+                    />
                     {valuation.blendedFairPrice !== 'N/A' && (
                       <ReferenceLine y={parseFloat(valuation.blendedFairPrice.replace(/[^0-9.-]+/g, ''))} stroke="var(--success-color)" strokeDasharray="3 3" />
                     )}
-                    <Line type="monotone" dataKey="price" stroke="var(--accent-color)" strokeWidth={2} dot={false} />
+                    <Line type="monotone" dataKey="price" stroke="var(--accent-color)" strokeWidth={3} dot={false} filter="url(#neonGlow)" />
                   </LineChart>
                 </ResponsiveContainer>
-                <div style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
-                  1-Year Price History vs. <span style={{color: 'var(--success-color)'}}>Fair Value Line</span>
-                </div>
               </div>
             )}
 
@@ -594,26 +602,30 @@ function App() {
               </div>
             )}
 
-            <div className="data-grid">
-              <div className="data-item">
-                <Shield size={16} color="var(--accent-color)" style={{marginBottom: '0.25rem'}}/>
-                <span className="data-label">Graham Number</span>
-                <span className="data-value">{valuation.grahamFairPrice}</span>
+            <div className="bento-grid">
+              <div className="bento-item bento-featured highlight-item">
+                <span className="data-label" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <TrendingUp size={14} color="var(--success-color)" /> Ultimate Fair Price
+                </span>
+                <span className="data-value number-font">{valuation.blendedFairPrice}</span>
               </div>
-              <div className="data-item">
-                <Target size={16} color="var(--accent-color)" style={{marginBottom: '0.25rem'}}/>
-                <span className="data-label">Analyst Target</span>
-                <span className="data-value">{valuation.analystTarget}</span>
+              <div className="bento-item">
+                <span className="data-label" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <PieChart size={14} color="var(--accent-color)" /> Lynch Fair Price
+                </span>
+                <span className="data-value number-font">{valuation.lynchFairPrice}</span>
               </div>
-              <div className="data-item">
-                <PieChart size={16} color="var(--accent-color)" style={{marginBottom: '0.25rem'}}/>
-                <span className="data-label">Lynch Fair Price</span>
-                <span className="data-value">{valuation.lynchFairPrice}</span>
+              <div className="bento-item">
+                <span className="data-label" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <Shield size={14} color="var(--accent-color)" /> Graham Number
+                </span>
+                <span className="data-value number-font">{valuation.grahamFairPrice}</span>
               </div>
-              <div className="data-item highlight-item">
-                <TrendingUp size={16} color="var(--success-color)" style={{marginBottom: '0.25rem'}}/>
-                <span className="data-label">Ultimate Fair Price</span>
-                <span className="data-value">{valuation.blendedFairPrice}</span>
+              <div className="bento-item">
+                <span className="data-label" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <Target size={14} color="var(--accent-color)" /> Analyst Target
+                </span>
+                <span className="data-value number-font">{valuation.analystTarget}</span>
               </div>
             </div>
 
