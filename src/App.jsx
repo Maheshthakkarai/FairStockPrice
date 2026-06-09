@@ -722,7 +722,7 @@ function App() {
                           <Bar dataKey="actual" fill="#3b82f6" name="Actual" radius={[4, 4, 0, 0]}>
                             <LabelList dataKey="actual" position="top" style={{ fill: 'var(--text-primary)', fontSize: 10 }} />
                           </Bar>
-                          <Bar dataKey="estimate" fill="rgba(255,255,255,0.3)" name="Estimate" radius={[4, 4, 0, 0]}>
+                          <Bar dataKey="estimate" fill="var(--bar-estimate-fill)" name="Estimate" radius={[4, 4, 0, 0]}>
                             <LabelList dataKey="estimate" position="top" style={{ fill: 'var(--text-secondary)', fontSize: 10 }} />
                           </Bar>
                         </BarChart>

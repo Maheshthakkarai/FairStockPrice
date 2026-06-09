@@ -14,6 +14,7 @@
   --warning-color: #ffb74d;
   --card-bg-solid: #11141c;
   --card-bg-transparent: rgba(0, 0, 0, 0.3);
+  --bar-estimate-fill: rgba(255, 255, 255, 0.3);
   --input-bg-solid: #0d1017;
   --btn-secondary-bg: rgba(255, 255, 255, 0.05);
   --btn-secondary-hover: rgba(255, 255, 255, 0.1);
@@ -615,6 +616,7 @@ body.light-mode {
   --text-secondary: #475569;
   --card-bg-solid: #ffffff;
   --card-bg-transparent: rgba(255, 255, 255, 0.6);
+  --bar-estimate-fill: rgba(0, 0, 0, 0.15);
   --input-bg-solid: #f1f5f9;
   --btn-secondary-bg: rgba(0, 0, 0, 0.05);
   --btn-secondary-hover: rgba(0, 0, 0, 0.1);
