@@ -175,7 +175,7 @@ input:focus {
   top: 100%;
   left: 0;
   right: 0;
-  background: #11141c;
+  background: var(--card-bg-solid);
   border: 1px solid var(--panel-border);
   border-radius: 12px;
   margin-top: 0.5rem;
@@ -190,7 +190,7 @@ input:focus {
 .autocomplete-dropdown li {
   padding: 0.85rem 1rem;
   cursor: pointer;
-  border-bottom: 1px solid rgba(255,255,255,0.03);
+  border-bottom: 1px solid var(--panel-border);
   font-size: 0.95rem;
   transition: background 0.2s;
 }
