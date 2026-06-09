@@ -13,6 +13,14 @@ const getCurrencySymbol = (currency, fallbackSymbol) => {
   return symbolsMap[currency] || fallbackSymbol || '$';
 };
 
+const formatLargeNumber = (num) => {
+  if (!num) return 'N/A';
+  if (num >= 1e12) return (num / 1e12).toFixed(3) + 'T';
+  if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
+  if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
+  return num.toLocaleString();
+};
+
 function App() {
   const [ticker, setTicker] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -650,8 +658,8 @@ function App() {
                     <div className="stat-row"><span className="stat-label">Day Low</span><span className="stat-value">{data.keyStats.dayLow?.toFixed(2) || 'N/A'}</span></div>
                     <div className="stat-row"><span className="stat-label">52 Wk High</span><span className="stat-value">{data.keyStats.fiftyTwoWeekHigh?.toFixed(2) || 'N/A'}</span></div>
                     <div className="stat-row"><span className="stat-label">52 Wk Low</span><span className="stat-value">{data.keyStats.fiftyTwoWeekLow?.toFixed(2) || 'N/A'}</span></div>
-                    <div className="stat-row"><span className="stat-label">Market Cap</span><span className="stat-value">{data.keyStats.marketCap ? (data.keyStats.marketCap / 1e9).toFixed(2) + 'B' : 'N/A'}</span></div>
-                    <div className="stat-row"><span className="stat-label">Shares Out.</span><span className="stat-value">{data.keyStats.sharesOutstanding ? (data.keyStats.sharesOutstanding / 1e9).toFixed(2) + 'B' : 'N/A'}</span></div>
+                    <div className="stat-row"><span className="stat-label">Market Cap</span><span className="stat-value">{formatLargeNumber(data.keyStats.marketCap)}</span></div>
+                    <div className="stat-row"><span className="stat-label">Shares Out.</span><span className="stat-value">{formatLargeNumber(data.keyStats.sharesOutstanding)}</span></div>
                     <div className="stat-row"><span className="stat-label">Dividend Yield</span><span className="stat-value">{data.dividendYield?.toFixed(2)}%</span></div>
                     <div className="stat-row"><span className="stat-label">Beta</span><span className="stat-value">{data.keyStats.beta?.toFixed(2) || 'N/A'}</span></div>
                   </div>
@@ -662,8 +670,8 @@ function App() {
                     <div className="detailed-section-title">Ratios / Profitability</div>
                     <div className="stat-row"><span className="stat-label">EPS (TTM)</span><span className="stat-value">{data.eps?.toFixed(2) || 'N/A'}</span></div>
                     <div className="stat-row"><span className="stat-label">P/E Ratio</span><span className="stat-value">{data.peRatio?.toFixed(2) || 'N/A'}</span></div>
-                    <div className="stat-row"><span className="stat-label">EBITDA</span><span className="stat-value">{data.ratios.ebitda ? (data.ratios.ebitda / 1e9).toFixed(2) + 'B' : 'N/A'}</span></div>
-                    <div className="stat-row"><span className="stat-label">Revenue</span><span className="stat-value">{data.ratios.revenue ? (data.ratios.revenue / 1e9).toFixed(2) + 'B' : 'N/A'}</span></div>
+                    <div className="stat-row"><span className="stat-label">EBITDA</span><span className="stat-value">{formatLargeNumber(data.ratios.ebitda)}</span></div>
+                    <div className="stat-row"><span className="stat-label">Revenue</span><span className="stat-value">{formatLargeNumber(data.ratios.revenue)}</span></div>
                     <div className="stat-row"><span className="stat-label">Gross Margin</span><span className="stat-value">{data.ratios.grossMargins?.toFixed(2)}%</span></div>
                     <div className="stat-row"><span className="stat-label">Net Margin</span><span className="stat-value">{data.ratios.netMargins?.toFixed(2)}%</span></div>
                     <div className="stat-row"><span className="stat-label">Return on Equity</span><span className="stat-value">{data.returnOnEquity?.toFixed(2)}%</span></div>
@@ -732,7 +740,7 @@ function App() {
                               </div>
                               {o.pay > 0 && (
                                 <div style={{ color: 'var(--text-primary)', fontSize: '0.85rem', fontWeight: '500' }}>
-                                  {(o.pay).toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })}
+                                  {(o.pay).toLocaleString('en-US', { style: 'currency', currency: data.currency || 'USD', maximumFractionDigits: 0 })}
                                 </div>
                               )}
                             </div>
