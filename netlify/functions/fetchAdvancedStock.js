@@ -24,12 +24,15 @@ export const handler = async (event) => {
     // 3. Fetch 1-Year Historical Data for the chart and returns
     const today = new Date();
     const lastYear = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
-    const ytdStart = new Date(today.getFullYear(), 0, 1);
-    const history = await yahooFinance.historical(ticker, { 
+    
+    // We use chart() instead of historical() to bypass strict null validation errors on international holidays
+    const chartRes = await yahooFinance.chart(ticker, { 
       period1: lastYear.toISOString().split('T')[0], 
-      period2: today.toISOString().split('T')[0],
-      interval: '1d' 
+      period2: today.toISOString().split('T')[0] 
     });
+    
+    // Filter out partial holiday nulls
+    const history = (chartRes.quotes || []).filter(q => q.close !== null);
 
     // Format history for Recharts (keep it monthly to not overload UI)
     const monthlyHistory = [];
