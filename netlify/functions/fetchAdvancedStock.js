@@ -2,6 +2,33 @@ import YahooFinance from 'yahoo-finance2';
 
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 
+const normalizeName = (name) => {
+  if (!name) return '';
+  return name
+    .replace(/^(Mr\.|Ms\.|Mrs\.|Dr\.)\s+/i, '')
+    .replace(/\s+/g, ' ')
+    .toLowerCase()
+    .trim();
+};
+
+const nameMatches = (name1, name2) => {
+  const n1 = normalizeName(name1);
+  const n2 = normalizeName(name2);
+  if (n1 === n2) return true;
+
+  const words1 = n1.split(' ').filter(w => w.length > 1);
+  const words2 = n2.split(' ').filter(w => w.length > 1);
+
+  if (words1.length >= 2 && words2.length >= 2) {
+    const first1 = words1[0];
+    const last1 = words1[words1.length - 1];
+    const first2 = words2[0];
+    const last2 = words2[words2.length - 1];
+    return first1 === first2 && last1 === last2;
+  }
+  return false;
+};
+
 export const handler = async (event) => {
   if (event.httpMethod !== 'GET') {
     return { statusCode: 405, body: 'Method Not Allowed' };
@@ -141,18 +168,58 @@ export const handler = async (event) => {
     // Earnings Data
     const earningsChart = summary.earnings?.earningsChart?.quarterly || [];
 
-    // Profile Data
+    // Profile Data & Key Executives
+    let cnbcOfficers = [];
+    try {
+      const cnbcUrl = `https://www.cnbc.com/quotes/${ticker}?tab=profile`;
+      const cnbcRes = await fetch(cnbcUrl);
+      if (cnbcRes.ok) {
+        const html = await cnbcRes.text();
+        const regex = /<div class="CompanyProfile-officer"><div>([^<]+)<\/div><div class="CompanyProfile-officerTitle">([^<]+)<\/div><\/div>/g;
+        let match;
+        while ((match = regex.exec(html)) !== null) {
+          cnbcOfficers.push({
+            name: match[1].trim(),
+            title: match[2].trim(),
+            age: null,
+            pay: 0
+          });
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to fetch CNBC profile:", e.message);
+    }
+
     const rawOfficers = summary.assetProfile?.companyOfficers || summary.summaryProfile?.companyOfficers || [];
+    const yahooOfficers = rawOfficers.map(o => ({
+      name: o.name,
+      title: o.title,
+      age: o.age || null,
+      pay: o.totalPay || 0
+    }));
+
+    let mergedOfficers = [];
+    if (cnbcOfficers.length > 0) {
+      mergedOfficers = cnbcOfficers.map(c => {
+        const yMatch = yahooOfficers.find(y => nameMatches(c.name, y.name));
+        if (yMatch) {
+          return {
+            ...c,
+            age: yMatch.age,
+            pay: yMatch.pay
+          };
+        }
+        return c;
+      });
+    } else {
+      mergedOfficers = yahooOfficers.slice(0, 4);
+    }
+
     const profile = {
       description: summary.assetProfile?.longBusinessSummary || summary.summaryProfile?.longBusinessSummary || '',
       industry: summary.assetProfile?.industry || summary.summaryProfile?.industry || '',
       website: summary.assetProfile?.website || summary.summaryProfile?.website || '',
-      officers: rawOfficers.slice(0, 4).map(o => ({
-        name: o.name,
-        title: o.title,
-        age: o.age || null,
-        pay: o.totalPay || 0
-      })),
+      officers: mergedOfficers,
       address: `${summary.assetProfile?.address1 || summary.summaryProfile?.address1 || ''}, ${summary.assetProfile?.city || summary.summaryProfile?.city || ''} ${summary.assetProfile?.state || summary.summaryProfile?.state || ''} ${summary.assetProfile?.zip || summary.summaryProfile?.zip || ''}`.replace(/^, | , | $/g, '').trim()
     };
 
