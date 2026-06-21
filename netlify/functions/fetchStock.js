@@ -14,10 +14,10 @@ export const handler = async (event) => {
 
   try {
     
-    const quote = await yahooFinance.quote(ticker);
+    const quote = await yahooFinance.quote(ticker, {}, { validateResult: false });
     const quoteSummary = await yahooFinance.quoteSummary(ticker, {
       modules: ['summaryDetail', 'defaultKeyStatistics', 'earningsTrend']
-    });
+    }, { validateResult: false });
 
     const currentPrice = quote.regularMarketPrice || null;
     const peRatio = quote.trailingPE || quoteSummary.summaryDetail?.trailingPE || null;

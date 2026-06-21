@@ -14,12 +14,12 @@ export const handler = async (event) => {
 
   try {
     // 1. Fetch current quote
-    const quote = await yahooFinance.quote(ticker);
+    const quote = await yahooFinance.quote(ticker, {}, { validateResult: false });
     
     // 2. Fetch rich summary data
     const summary = await yahooFinance.quoteSummary(ticker, {
       modules: ['summaryDetail', 'defaultKeyStatistics', 'earningsTrend', 'financialData', 'summaryProfile', 'assetProfile', 'calendarEvents', 'earnings', 'price']
-    });
+    }, { validateResult: false });
 
     // 3. Fetch 1-Year Historical Data for the chart and returns
     const today = new Date();
@@ -29,7 +29,7 @@ export const handler = async (event) => {
     const chartRes = await yahooFinance.chart(ticker, { 
       period1: lastYear.toISOString().split('T')[0], 
       period2: today.toISOString().split('T')[0] 
-    });
+    }, { validateResult: false });
     
     // Filter out partial holiday nulls
     const history = (chartRes.quotes || []).filter(q => q.close !== null);
@@ -160,11 +160,11 @@ export const handler = async (event) => {
     let news = [];
     let competitors = [];
     try {
-      const searchRes = await yahooFinance.search(ticker);
+      const searchRes = await yahooFinance.search(ticker, {}, { validateResult: false });
       if (searchRes.news) {
         news = searchRes.news.slice(0, 3).map(n => ({ title: n.title, link: n.link, publisher: n.publisher }));
       }
-      const recs = await yahooFinance.recommendationsBySymbol(ticker);
+      const recs = await yahooFinance.recommendationsBySymbol(ticker, {}, { validateResult: false });
       if (recs && recs.recommendedSymbols) {
         competitors = recs.recommendedSymbols.slice(0, 4).map(r => r.symbol);
       }

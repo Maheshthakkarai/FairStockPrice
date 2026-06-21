@@ -31,7 +31,7 @@ export const handler = async (event) => {
     }
 
     // Run searches in parallel
-    const searchPromises = searchQueries.map(q => yahooFinance.search(q));
+    const searchPromises = searchQueries.map(q => yahooFinance.search(q, {}, { validateResult: false }));
     const resultsArray = await Promise.all(searchPromises);
     
     // Combine and deduplicate quotes
